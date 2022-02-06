@@ -42,3 +42,13 @@ task fatJar(type: Jar, dependsOn: configurations.runtimeClasspath) {
         }
     }
 }
+
+task expandFatJar(type: Jar, dependsOn: configurations.runtimeClasspath) {
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    archiveFileName = "game.jar"
+    with jar
+    manifest {
+        attributes 'Main-Class': "Main"
+    }
+    expand([env: "production"])// This line make the task fails.
+}
