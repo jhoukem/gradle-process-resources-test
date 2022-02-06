@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':core')
+}
+
+sourceCompatibility = 1.8
+
+task fatJar(type: Jar, dependsOn: configurations.runtimeClasspath) {
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    archiveFileName = "game.jar"
+    with jar
+    manifest {
+        attributes 'Main-Class': "Main"
+    }
+    def appPropertiesExtractedPath
+    eachFile { FileCopyDetails fcd -> // Set production properties
+        if (fcd.name == "app.properties" || fcd.name == 'app2.properties') {
+            if(fcd.name == 'app.properties'){
+                appPropertiesExtractedPath = fcd.file.path
+            }
+            ant.propertyfile(file: fcd.file) {
+                entry(key: "production", value: "true")
+            }
+            println "$fcd.name content:"
+            filter { line ->
+                println line
+                return line
+            }
+        }
+    }
+    doLast {
+        File file = file(appPropertiesExtractedPath)
+        def line
+        println "app.properties file content from tmp directory ($appPropertiesExtractedPath)"
+        file.withReader { reader ->
+            while ((line = reader.readLine()) != null) {
+                println "${line}"
+            }
+        }
+    }
+}

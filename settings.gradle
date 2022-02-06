@@ -1,0 +1,4 @@
+rootProject.name = 'gradle-process-resources-test'
+include 'core'
+include 'game'
+
